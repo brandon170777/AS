@@ -1,0 +1,50 @@
+﻿@page
+@model WebApplication1.Pages.IndexModel
+@{
+    ViewData["Title"] = "Bookworms Online";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <h2>Welcome to Bookworms Online</h2>
+            <hr />
+
+            @if (TempData["ForcePasswordChange"] != null)
+            {
+                <div class="alert alert-warning">@TempData["ForcePasswordChange"]</div>
+            }
+
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <img src="@Model.PhotoPath" class="img-thumbnail" width="200" />
+                </div>
+
+                <div class="col-md-8">
+                    <p><strong>First Name:</strong> @Model.FirstName</p>
+                    <p><strong>Last Name:</strong> @Model.LastName</p>
+                    <p><strong>Email:</strong> @Model.Email</p>
+                    <p><strong>Mobile:</strong> @Model.Mobile</p>
+                    <p><strong>Billing Address:</strong> @Model.Billing</p>
+                    <p><strong>Shipping Address:</strong> @Model.Shipping</p>
+
+                    <p class="text-danger">
+                        <strong>Credit Card (Decrypted):</strong> @Model.CreditCard
+                    </p>
+                </div>
+            </div>
+
+            <hr />
+
+            <a asp-page="/ChangePassword" class="btn btn-warning">Change Password</a>
+            <a asp-page="/Setup2fa" class="btn btn-info ms-2">2FA Settings</a>
+
+            <!-- 🔐 Logout as POST form (CSRF-safe) -->
+            <form method="post" asp-page="/Logout" class="d-inline">
+                <button type="submit" class="btn btn-danger ms-2">Logout</button>
+            </form>
+
+        </div>
+    </div>
+</div>

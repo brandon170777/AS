@@ -1,0 +1,531 @@
+﻿@page
+@model WebApplication1.Pages.RegisterModel
+@{
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/register.css" />
+    <style>
+        .strength-bar {
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        .strength-text {
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        #strengthSection {
+            display: none;
+        }
+        .live-check {
+            display: none;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        .live-check li {
+            transition: opacity 0.2s;
+        }
+    </style>
+}
+
+<!-- Google reCAPTCHA -->
+<script src="https://www.google.com/recaptcha/api.js?render=6Ld-IVUsAAAAAADTZ-OWAYGNHoYIvrdEoWmw3yhe"></script>
+
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-sm-12 col-md-12 col-lg-5 register-card">
+
+            <h1 class="mb-3 text-center">Bookworms Online – Register</h1>
+
+            <form method="post"
+                  enctype="multipart/form-data"
+                  id="registerForm"
+                  novalidate>
+
+                <input type="hidden" id="recaptchaToken" name="recaptchaToken" />
+
+                <!-- Top-level (non-field) errors -->
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-2"></div>
+
+                <!-- First Name -->
+                <div class="mb-3">
+                    <label asp-for="RModel.FirstName" class="form-label"></label>
+                    <input asp-for="RModel.FirstName"
+                           class="form-control"
+                           id="firstNameInput"
+                           autocomplete="given-name"
+                           data-strip="name" />
+                    <span asp-validation-for="RModel.FirstName"
+                          class="field-validation-error"></span>
+                    <ul id="firstNameCheck" class="live-check list-unstyled">
+                        <li id="fnRequired" class="text-danger">&#10060; First name is required</li>
+                        <li id="fnMaxLen" class="text-danger">&#10060; Cannot exceed 50 characters</li>
+                        <li id="fnSymbols" class="text-danger">&#10060; Must not contain special characters</li>
+                    </ul>
+                </div>
+
+                <!-- Last Name -->
+                <div class="mb-3">
+                    <label asp-for="RModel.LastName" class="form-label"></label>
+                    <input asp-for="RModel.LastName"
+                           class="form-control"
+                           id="lastNameInput"
+                           autocomplete="family-name"
+                           data-strip="name" />
+                    <span asp-validation-for="RModel.LastName"
+                          class="field-validation-error"></span>
+                    <ul id="lastNameCheck" class="live-check list-unstyled">
+                        <li id="lnRequired" class="text-danger">&#10060; Last name is required</li>
+                        <li id="lnMaxLen" class="text-danger">&#10060; Cannot exceed 50 characters</li>
+                        <li id="lnSymbols" class="text-danger">&#10060; Must not contain special characters</li>
+                    </ul>
+                </div>
+
+                <!-- Credit Card -->
+                <div class="mb-3">
+                    <label asp-for="RModel.CreditCard" class="form-label"></label>
+                    <input asp-for="RModel.CreditCard"
+                           class="form-control"
+                           id="creditCardInput"
+                           type="text"
+                           inputmode="numeric"
+                           autocomplete="off"
+                           data-lpignore="true"
+                           data-strip="digits"
+                           maxlength="16"
+                           pattern="^\d{16}$"
+                           title="Must be exactly 16 digits."
+                           placeholder="16-digit card number" />
+                    <span asp-validation-for="RModel.CreditCard"
+                          class="field-validation-error"></span>
+                    <ul id="creditCardCheck" class="live-check list-unstyled">
+                        <li id="ccRequired" class="text-danger">&#10060; Credit card number is required</li>
+                        <li id="ccDigitsOnly" class="text-danger">&#10060; Must contain numbers only</li>
+                        <li id="ccLength" class="text-danger">&#10060; Must be exactly 16 digits</li>
+                    </ul>
+                </div>
+
+                <!-- Mobile -->
+                <div class="mb-3">
+                    <label asp-for="RModel.MobileNo" class="form-label"></label>
+                    <input asp-for="RModel.MobileNo"
+                           class="form-control"
+                           id="mobileInput"
+                           type="tel"
+                           maxlength="8"
+                           inputmode="numeric"
+                           data-strip="digits"
+                           placeholder="8-digit mobile number" />
+                    <span asp-validation-for="RModel.MobileNo"
+                          class="field-validation-error"></span>
+                    <ul id="mobileCheck" class="live-check list-unstyled">
+                        <li id="mobRequired" class="text-danger">&#10060; Mobile number is required</li>
+                        <li id="mobDigits" class="text-danger">&#10060; Must be exactly 8 digits</li>
+                    </ul>
+                </div>
+
+                <!-- Billing Address -->
+                <div class="mb-3">
+                    <label asp-for="RModel.BillingAddress" class="form-label"></label>
+                    <input asp-for="RModel.BillingAddress"
+                           class="form-control"
+                           id="billingInput"
+                           autocomplete="billing street-address" />
+                    <span asp-validation-for="RModel.BillingAddress"
+                          class="field-validation-error"></span>
+                    <ul id="billingCheck" class="live-check list-unstyled">
+                        <li id="billRequired" class="text-danger">&#10060; Billing address is required</li>
+                    </ul>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="mb-3">
+                    <label asp-for="RModel.ShippingAddress" class="form-label"></label>
+                    <input asp-for="RModel.ShippingAddress"
+                           class="form-control"
+                           id="shippingInput"
+                           autocomplete="shipping street-address"
+                           data-strip="address" />
+                    <span asp-validation-for="RModel.ShippingAddress"
+                          class="field-validation-error"></span>
+                    <ul id="shippingCheck" class="live-check list-unstyled">
+                        <li id="shipRequired" class="text-danger">&#10060; Shipping address is required</li>
+                        <li id="shipSymbols" class="text-danger">&#10060; Must not contain special characters</li>
+                    </ul>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label asp-for="RModel.Email" class="form-label"></label>
+                    <input asp-for="RModel.Email"
+                           type="email"
+                           class="form-control"
+                           id="emailInput"
+                           autocomplete="email"
+                           data-strip="email" />
+                    <span asp-validation-for="RModel.Email"
+                          class="field-validation-error"></span>
+                    <ul id="emailCheck" class="live-check list-unstyled">
+                        <li id="emRequired" class="text-danger">&#10060; Email is required</li>
+                        <li id="emFormat" class="text-danger">&#10060; Invalid email format</li>
+                        <li id="emSymbols" class="text-danger">&#10060; Contains invalid characters</li>
+                    </ul>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label asp-for="RModel.Password" class="form-label"></label>
+                    <input asp-for="RModel.Password"
+                           type="password"
+                           class="form-control"
+                           id="passwordInput"
+                           autocomplete="new-password" />
+                    <span asp-validation-for="RModel.Password"
+                          class="field-validation-error"></span>
+
+                    <!-- Real-time password strength (hidden until user types) -->
+                    <div id="strengthSection" class="mt-2">
+                        <div class="bg-light rounded" style="height:8px;">
+                            <div id="strengthBar" class="strength-bar" style="width:0%;"></div>
+                        </div>
+                        <div id="strengthText" class="strength-text text-muted"></div>
+                        <ul id="strengthChecklist" class="list-unstyled mt-1" style="font-size:0.8rem;">
+                            <li id="chkLength" class="text-danger">&#10060; At least 12 characters</li>
+                            <li id="chkUpper" class="text-danger">&#10060; At least 1 uppercase letter</li>
+                            <li id="chkLower" class="text-danger">&#10060; At least 1 lowercase letter</li>
+                            <li id="chkDigit" class="text-danger">&#10060; At least 1 number</li>
+                            <li id="chkSpecial" class="text-danger">&#10060; At least 1 special character</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3">
+                    <label asp-for="RModel.ConfirmPassword" class="form-label"></label>
+                    <input asp-for="RModel.ConfirmPassword"
+                           type="password"
+                           class="form-control"
+                           id="confirmPwInput"
+                           autocomplete="new-password" />
+                    <span asp-validation-for="RModel.ConfirmPassword"
+                          class="field-validation-error"></span>
+                    <ul id="confirmPwCheck" class="live-check list-unstyled">
+                        <li id="cpRequired" class="text-danger">&#10060; Confirm password is required</li>
+                        <li id="cpMatch" class="text-danger">&#10060; Passwords do not match</li>
+                    </ul>
+                </div>
+
+                <!-- Photo Upload -->
+                <div class="mb-3">
+                    <label asp-for="RModel.Photo" class="form-label">
+                        Profile Photo (JPG only)
+                    </label>
+                    <input asp-for="RModel.Photo"
+                           type="file"
+                           class="form-control"
+                           accept=".jpg,image/jpeg" />
+                    <span asp-validation-for="RModel.Photo"
+                          class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        Register
+                    </button>
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Client-side validation -->
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // =============================================
+        // Google reCAPTCHA v3 — generate fresh token on submit
+        // =============================================
+        document.getElementById("registerForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            var form = this;
+            grecaptcha.ready(function () {
+                grecaptcha.execute(
+                    '6Ld-IVUsAAAAAADTZ-OWAYGNHoYIvrdEoWmw3yhe',
+                    { action: 'register' }
+                ).then(function (token) {
+                    document.getElementById("recaptchaToken").value = token;
+                    form.submit();
+                });
+            });
+        });
+
+        // =============================================
+        // Real-time symbol stripping
+        // Blocks: < > { } ( ) [ ] ; = " ' ` ~ ! $ % ^ & * | \ ?
+        // Email allows: @@ . _ - + (valid email chars)
+        // =============================================
+        var dangerousChars = new RegExp(
+            "[" +
+            "\x3c\x3e"  +   // < >
+            "\x7b\x7d"  +   // { }
+            "\x5b\x5d"  +   // [ ]
+            "\x28\x29"  +   // ( )
+            "\x3b\x3d"  +   // ; =
+            "\x22\x60"  +   // " `
+            "\x7e\x21"  +   // ~ !
+            "\x40\x24"  +   // @@ $
+            "\x25\x5e"  +   // % ^
+            "\x26\x2a"  +   // & *
+            "\x7c\x5c"  +   // | \
+            "\x3f"       +   // ?
+            "]", "g"
+        );
+
+        var emailDangerousChars = new RegExp(
+            "[" +
+            "\x3c\x3e"  +   // < >
+            "\x7b\x7d"  +   // { }
+            "\x5b\x5d"  +   // [ ]
+            "\x28\x29"  +   // ( )
+            "\x3b"       +   // ;
+            "\x22\x60"  +   // " `
+            "\x7e\x21"  +   // ~ !
+            "\x24"       +   // $
+            "\x25\x5e"  +   // % ^
+            "\x26\x2a"  +   // & *
+            "\x7c\x5c"  +   // | \
+            "\x3f"       +   // ?
+            "\x27"       +   // '
+            "\x23"       +   // #
+            "\x2f"       +   // /
+            "\x20"       +   // space
+            "]", "g"
+        );
+
+        var stripPatterns = {
+            name: /[^a-zA-Z\s\-']/g,
+            digits: /[^0-9]/g,
+            address: /[^a-zA-Z0-9\s,.\-#/]/g,
+            email: emailDangerousChars
+        };
+
+        var blockedKeys = [
+            '\x3c', '\x3e', '\x7b', '\x7d', '\x5b', '\x5d',
+            '\x28', '\x29', '\x3b', '\x3d', '\x22', '\x60',
+            '\x7e', '\x21', '\x40', '\x24', '\x25', '\x5e',
+            '\x26', '\x2a', '\x7c', '\x5c', '\x3f'
+        ];
+
+        var emailBlockedKeys = [
+            '\x3c', '\x3e', '\x7b', '\x7d', '\x5b', '\x5d',
+            '\x28', '\x29', '\x3b', '\x22', '\x60', '\x7e',
+            '\x21', '\x24', '\x25', '\x5e', '\x26', '\x2a',
+            '\x7c', '\x5c', '\x3f', '\x27', '\x23', '\x2f', '\x20'
+        ];
+
+        document.querySelectorAll("[data-strip]").forEach(function (input) {
+            var type = input.getAttribute("data-strip");
+            var pattern = stripPatterns[type];
+            if (!pattern) return;
+
+            var isEmail = (type === "email");
+            var keys = isEmail ? emailBlockedKeys : blockedKeys;
+
+            input.addEventListener("keydown", function (e) {
+                if (keys.indexOf(e.key) !== -1) {
+                    e.preventDefault();
+                }
+            });
+
+            input.addEventListener("input", function () {
+                var pos = this.selectionStart;
+                var before = this.value;
+                var after;
+                if (isEmail) {
+                    after = before.replace(pattern, "");
+                } else {
+                    after = before.replace(dangerousChars, "").replace(pattern, "");
+                }
+                if (before !== after) {
+                    this.value = after;
+                    var newPos = pos - (before.length - after.length);
+                    this.setSelectionRange(newPos, newPos);
+                }
+            });
+
+            input.addEventListener("paste", function (e) {
+                var self = this;
+                var isEm = isEmail;
+                var pat = pattern;
+                setTimeout(function () {
+                    if (isEm) {
+                        self.value = self.value.replace(pat, "");
+                    } else {
+                        self.value = self.value.replace(dangerousChars, "").replace(pat, "");
+                    }
+                    self.dispatchEvent(new Event("input"));
+                }, 0);
+            });
+        });
+
+        // =============================================
+        // Live validation helper
+        // =============================================
+        function liveCheck(inputId, sectionId, rules) {
+            document.getElementById(inputId).addEventListener("input", function () {
+                var val = this.value;
+                var section = document.getElementById(sectionId);
+                if (val.length === 0) { section.style.display = "none"; return; }
+                section.style.display = "block";
+                rules.forEach(function (r) {
+                    var el = document.getElementById(r.id);
+                    var passed = r.test(val);
+                    if (passed) {
+                        el.textContent = "\u2705 " + r.label;
+                        el.className = "text-success";
+                        el.style.display = "none";
+                    } else {
+                        el.textContent = "\u274c " + r.label;
+                        el.className = "text-danger";
+                        el.style.display = "list-item";
+                    }
+                });
+            });
+        }
+
+        liveCheck("firstNameInput", "firstNameCheck", [
+            { id: "fnRequired", label: "First name is required", test: function (v) { return v.length > 0; } },
+            { id: "fnMaxLen", label: "Cannot exceed 50 characters", test: function (v) { return v.length <= 50; } },
+            { id: "fnSymbols", label: "Must not contain special characters", test: function (v) { return /^[a-zA-Z\s\-']+$/.test(v); } }
+        ]);
+
+        liveCheck("lastNameInput", "lastNameCheck", [
+            { id: "lnRequired", label: "Last name is required", test: function (v) { return v.length > 0; } },
+            { id: "lnMaxLen", label: "Cannot exceed 50 characters", test: function (v) { return v.length <= 50; } },
+            { id: "lnSymbols", label: "Must not contain special characters", test: function (v) { return /^[a-zA-Z\s\-']+$/.test(v); } }
+        ]);
+
+        liveCheck("creditCardInput", "creditCardCheck", [
+            { id: "ccRequired", label: "Credit card number is required", test: function (v) { return v.length > 0; } },
+            { id: "ccDigitsOnly", label: "Must contain numbers only", test: function (v) { return /^\d+$/.test(v); } },
+            { id: "ccLength", label: "Must be exactly 16 digits", test: function (v) { return /^\d{16}$/.test(v); } }
+        ]);
+
+        liveCheck("mobileInput", "mobileCheck", [
+            { id: "mobRequired", label: "Mobile number is required", test: function (v) { return v.length > 0; } },
+            { id: "mobDigits", label: "Must be exactly 8 digits", test: function (v) { return /^\d{8}$/.test(v); } }
+        ]);
+
+        liveCheck("billingInput", "billingCheck", [
+            { id: "billRequired", label: "Billing address is required", test: function (v) { return v.trim().length > 0; } }
+        ]);
+
+        liveCheck("shippingInput", "shippingCheck", [
+            { id: "shipRequired", label: "Shipping address is required", test: function (v) { return v.trim().length > 0; } },
+            { id: "shipSymbols", label: "Must not contain special characters", test: function (v) { return /^[a-zA-Z0-9\s,.\-#/]+$/.test(v); } }
+        ]);
+
+        liveCheck("emailInput", "emailCheck", [
+            { id: "emRequired", label: "Email is required", test: function (v) { return v.length > 0; } },
+            { id: "emFormat", label: "Invalid email format", test: function (v) { return /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(v); } },
+            { id: "emSymbols", label: "Contains invalid characters", test: function (v) { return /^[a-zA-Z0-9._%+\x2d\x40]+$/.test(v); } }
+        ]);
+
+        // --- Confirm Password ---
+        document.getElementById("confirmPwInput").addEventListener("input", function () {
+            var val = this.value;
+            var pw = document.getElementById("passwordInput").value;
+            var section = document.getElementById("confirmPwCheck");
+            if (val.length === 0) { section.style.display = "none"; return; }
+            section.style.display = "block";
+
+            var reqEl = document.getElementById("cpRequired");
+            reqEl.style.display = "none";
+
+            var matchEl = document.getElementById("cpMatch");
+            if (val === pw) {
+                matchEl.textContent = "\u2705 Passwords match";
+                matchEl.className = "text-success";
+                matchEl.style.display = "none";
+            } else {
+                matchEl.textContent = "\u274c Passwords do not match";
+                matchEl.className = "text-danger";
+                matchEl.style.display = "list-item";
+            }
+        });
+
+        // Real-time password strength checker
+        document.getElementById("passwordInput").addEventListener("input", function () {
+            var pw = this.value;
+            var section = document.getElementById("strengthSection");
+            var bar = document.getElementById("strengthBar");
+            var text = document.getElementById("strengthText");
+
+            if (pw.length === 0) {
+                section.style.display = "none";
+                return;
+            }
+
+            section.style.display = "block";
+
+            var score = 0;
+            var hasLength = pw.length >= 12;
+            var hasUpper = /[A-Z]/.test(pw);
+            var hasLower = /[a-z]/.test(pw);
+            var hasDigit = /\d/.test(pw);
+            var hasSpecial = /[\W_]/.test(pw);
+
+            function updateRule(id, passed, label) {
+                var el = document.getElementById(id);
+                if (passed) {
+                    el.textContent = "\u2705 " + label;
+                    el.className = "text-success";
+                    el.style.display = "none";
+                } else {
+                    el.textContent = "\u274c " + label;
+                    el.className = "text-danger";
+                    el.style.display = "list-item";
+                }
+            }
+
+            updateRule("chkLength", hasLength, "At least 12 characters");
+            updateRule("chkUpper", hasUpper, "At least 1 uppercase letter");
+            updateRule("chkLower", hasLower, "At least 1 lowercase letter");
+            updateRule("chkDigit", hasDigit, "At least 1 number");
+            updateRule("chkSpecial", hasSpecial, "At least 1 special character");
+
+            if (hasLength) score++;
+            if (hasUpper) score++;
+            if (hasLower) score++;
+            if (hasDigit) score++;
+            if (hasSpecial) score++;
+
+            var percent = (score / 5) * 100;
+            bar.style.width = percent + "%";
+
+            if (score <= 2) {
+                bar.style.backgroundColor = "#dc3545";
+                text.textContent = "Weak";
+                text.className = "strength-text text-danger";
+            } else if (score <= 3) {
+                bar.style.backgroundColor = "#ffc107";
+                text.textContent = "Medium";
+                text.className = "strength-text text-warning";
+            } else if (score === 4) {
+                bar.style.backgroundColor = "#198754";
+                text.textContent = "Strong";
+                text.className = "strength-text text-success";
+            } else {
+                bar.style.backgroundColor = "#0d6efd";
+                text.textContent = "Very Strong \u2714";
+                text.className = "strength-text text-primary fw-bold";
+            }
+        });
+    </script>
+}

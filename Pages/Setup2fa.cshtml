@@ -1,0 +1,89 @@
+@page
+@model WebApplication1.Pages.Setup2faModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <h2>Two-Factor Authentication (2FA)</h2>
+            <hr />
+
+            @if (TempData["StatusMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["StatusMessage"]</div>
+            }
+
+            @if (Model.Is2faEnabled)
+            {
+                <!-- 2FA is ON — show disable option -->
+                <div class="alert alert-info">
+                    <strong>2FA is currently enabled.</strong>
+                    You need your authenticator app each time you log in.
+                </div>
+
+                <form method="post" asp-page-handler="Disable">
+                    <button type="submit" class="btn btn-danger w-100">
+                        Disable 2FA
+                    </button>
+                </form>
+            }
+            else
+            {
+                <!-- 2FA is OFF — show setup -->
+                <p>Scan the QR code below with your authenticator app
+                    (e.g. Google Authenticator, Microsoft Authenticator).</p>
+
+                <div class="text-center my-3">
+                    <div id="qrCode"></div>
+                </div>
+
+                <p class="text-muted text-center" style="font-size:0.85rem;">
+                    Or manually enter this key: <br />
+                    <code>@Model.SharedKey</code>
+                </p>
+
+                <form method="post" asp-page-handler="Enable">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="VerificationCode" class="form-label">
+                            Verification Code
+                        </label>
+                        <input asp-for="VerificationCode"
+                               class="form-control"
+                               autocomplete="off"
+                               inputmode="numeric"
+                               maxlength="6"
+                               placeholder="Enter 6-digit code from app" />
+                        <span asp-validation-for="VerificationCode"
+                              class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">
+                        Verify &amp; Enable 2FA
+                    </button>
+                </form>
+            }
+
+            <hr />
+            <a asp-page="/Index" class="btn btn-secondary">Back to Home</a>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    @if (!Model.Is2faEnabled && !string.IsNullOrEmpty(Model.QrCodeUri))
+    {
+        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+        <script>
+            new QRCode(document.getElementById("qrCode"), {
+                text: "@Html.Raw(Model.QrCodeUri)",
+                width: 200,
+                height: 200
+            });
+        </script>
+    }
+}

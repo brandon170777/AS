@@ -1,0 +1,104 @@
+﻿@page "/Login"
+@model WebApplication1.Pages.LoginModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+
+            <h2>Login</h2>
+
+            @if (TempData["SessionKicked"] != null)
+            {
+                <div class="alert alert-warning">@TempData["SessionKicked"]</div>
+            }
+
+            @if (TempData["LoginBlocked"] != null)
+            {
+                <div class="alert alert-danger">@TempData["LoginBlocked"]</div>
+            }
+
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="LModel.Email"></label>
+                    <input asp-for="LModel.Email" class="form-control" data-strip="email" />
+                    <span asp-validation-for="LModel.Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="LModel.Password"></label>
+                    <input asp-for="LModel.Password" type="password" class="form-control" />
+                    <span asp-validation-for="LModel.Password" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+                <div class="mt-3 text-center">
+                    <a asp-page="/ForgotPassword">Forgot your password?</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Block HTML/script characters in email field (allow @@ . _ - +)
+        var emailDangerousChars = new RegExp(
+            "[" +
+            "\x3c\x3e"  +   // < >
+            "\x7b\x7d"  +   // { }
+            "\x5b\x5d"  +   // [ ]
+            "\x28\x29"  +   // ( )
+            "\x3b"       +   // ;
+            "\x22\x60"  +   // " `
+            "\x7e\x21"  +   // ~ !
+            "\x24"       +   // $
+            "\x25\x5e"  +   // % ^
+            "\x26\x2a"  +   // & *
+            "\x7c\x5c"  +   // | \
+            "\x3f"       +   // ?
+            "\x27"       +   // '
+            "\x23"       +   // #
+            "\x2f"       +   // /
+            "\x20"       +   // space
+            "]", "g"
+        );
+
+        var emailBlockedKeys = [
+            '\x3c', '\x3e', '\x7b', '\x7d', '\x5b', '\x5d',
+            '\x28', '\x29', '\x3b', '\x22', '\x60', '\x7e',
+            '\x21', '\x24', '\x25', '\x5e', '\x26', '\x2a',
+            '\x7c', '\x5c', '\x3f', '\x27', '\x23', '\x2f', '\x20'
+        ];
+
+        document.querySelectorAll("[data-strip='email']").forEach(function (input) {
+            input.addEventListener("keydown", function (e) {
+                if (emailBlockedKeys.indexOf(e.key) !== -1) {
+                    e.preventDefault();
+                }
+            });
+
+            input.addEventListener("input", function () {
+                var pos = this.selectionStart;
+                var before = this.value;
+                var after = before.replace(emailDangerousChars, "");
+                if (before !== after) {
+                    this.value = after;
+                    var newPos = pos - (before.length - after.length);
+                    this.setSelectionRange(newPos, newPos);
+                }
+            });
+
+            input.addEventListener("paste", function () {
+                var self = this;
+                setTimeout(function () {
+                    self.value = self.value.replace(emailDangerousChars, "");
+                    self.dispatchEvent(new Event("input"));
+                }, 0);
+            });
+        });
+    </script>
+}

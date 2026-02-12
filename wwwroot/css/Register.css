@@ -1,0 +1,39 @@
+﻿/* Invalid input */
+input.input-validation-error {
+    border: 2px solid #dc3545;
+}
+
+/* Valid input */
+input.valid {
+    border: 2px solid #28a745;
+}
+
+/* Error text under fields */
+.field-validation-error {
+    font-size: 0.9rem;
+    color: #dc3545;
+}
+
+/* Success box */
+.success-box {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+    .success-box.show {
+        display: block;
+    }
+
+.success-circle {
+    width: 60px;
+    height: 60px;
+    background: #28a745;
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 32px;
+}
