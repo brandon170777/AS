@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApplication1.Model;
 using System.Net.Mail;
-using System.Text;
-using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Cryptography;
 
 namespace WebApplication1.Pages
 {
@@ -12,16 +11,19 @@ namespace WebApplication1.Pages
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IConfiguration configuration;
+        private readonly AuthDbContext db;
 
         [BindProperty]
         public string Email { get; set; }
 
         public ForgotPasswordModel(
             UserManager<ApplicationUser> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            AuthDbContext db)
         {
             this.userManager = userManager;
             this.configuration = configuration;
+            this.db = db;
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -34,45 +36,49 @@ namespace WebApplication1.Pages
             // Do not reveal if user exists
             if (user == null)
             {
-                ViewData["Message"] = "If the account exists, a reset link has been sent.";
+                ViewData["Message"] = "If the account exists, an OTP has been sent.";
                 return Page();
             }
 
             // ===============================
-            // EMAIL RESET LINK
+            // EMAIL OTP CODE
             // ===============================
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var otpCode = RandomNumberGenerator.GetInt32(0, 1000000).ToString("D6");
 
-            var resetLink = Url.Page(
-                "/ResetPassword",
-                null,
-                new { userId = user.Id, token = encodedToken },
-                Request.Scheme);
+            db.OtpCodes.Add(new OtpCode
+            {
+                UserId = user.Id,
+                Code = otpCode,
+                Expiry = DateTime.UtcNow.AddMinutes(10),
+                Used = false
+            });
+
+            await db.SaveChangesAsync();
 
             var smtp = configuration["Email:Smtp"];
             var sender = configuration["Email:Sender"];
             var password = configuration["Email:Password"];
             var port = int.Parse(configuration["Email:Port"]!);
 
-            var client = new SmtpClient(smtp, port)
+            using var client = new SmtpClient(smtp, port)
             {
                 Credentials = new System.Net.NetworkCredential(sender, password),
-                EnableSsl = true
+                EnableSsl = true,
+                Timeout = 10000
             };
 
             var mail = new MailMessage
             {
                 From = new MailAddress(sender!),
-                Subject = "Bookworms Online – Password Reset",
-                Body = $"Click the link below to reset your password:\n\n{resetLink}"
+                Subject = "Bookworms Online – OTP Password Reset",
+                Body = $"Your OTP code is: {otpCode}\n\nThis code expires in 10 minutes."
             };
 
             mail.To.Add(user.Email!);
-            client.Send(mail);
+            await client.SendMailAsync(mail);
 
-            ViewData["Message"] = "Password reset link sent to your email.";
-            return Page();
+            TempData["UserId"] = user.Id;
+            return RedirectToPage("VerifyOtp");
         }
     }
 }
