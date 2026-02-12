@@ -61,6 +61,7 @@ publish/
 
 appsettings.Development.json
 secrets.json
+appsettings.json
 
 ############################
 # OS Files
